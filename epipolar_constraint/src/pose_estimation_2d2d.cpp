@@ -42,7 +42,7 @@ void find_feature_matches(const cv::Mat& img_1, const cv::Mat& img_2,
 
     for(int i = 0; i < descriptors_1.rows; i++)
     {
-        if(match[i].distance <= max(2*min_dist, 30.0))
+        if(match[i].distance <= cv::max(2*min_dist, 30.0))
         {
             matches.push_back(match[i]);
         }
@@ -72,13 +72,13 @@ void pose_estimation_2d2d(std::vector<cv::KeyPoint> keypoints_1,
     std::vector<cv::Point2f> points2;
     for(int i = 0; i < matches.size(); i++)
     {
-        points1.push_back(Keypoints_1[matches[i].queryIdx].pt);
-        points2.push_back(Keypoints_2[matches[i].trainIdx].pt);
+        points1.push_back(keypoints_1[matches[i].queryIdx].pt);
+        points2.push_back(keypoints_2[matches[i].trainIdx].pt);
     }
 
     //calculate fundamental matrix
     cv::Mat fundamental_matrix;
-    fundamental_matrix = cv::findFundamentalMat(points1, points2, cv::CV_FM_8POINT);
+    fundamental_matrix = cv::findFundamentalMat(points1, points2, CV_FM_8POINT);
     std::cout<<"fundamental_matrix is "<<std::endl<< fundamental_matrix<<std::endl;
 
     //calculate essential matrix
@@ -90,7 +90,7 @@ void pose_estimation_2d2d(std::vector<cv::KeyPoint> keypoints_1,
 
     //calculate homography matrix
     cv::Mat homography_matrix;
-    homography_matrix = cv::findHomography(points1, points2, RANSAC, 3);
+    homography_matrix = cv::findHomography(points1, points2, cv::RANSAC, 3);
     std::cout<<"homography_matrix is "<<std::endl<<homography_matrix<<std::endl;
 
     //recover pose from essential matrix
@@ -102,7 +102,7 @@ void pose_estimation_2d2d(std::vector<cv::KeyPoint> keypoints_1,
 int main(int argc, char* argv[])
 {
     cv::Mat img_1 = cv::imread(argv[1], CV_LOAD_IMAGE_COLOR);
-    CV::Mat img_2 = cv::imread(argv[2], CV_LOAD_IMAGE_COLOR);
+    cv::Mat img_2 = cv::imread(argv[2], CV_LOAD_IMAGE_COLOR);
 
     std::vector<cv::KeyPoint> keypoints_1;
     std::vector<cv::KeyPoint> keypoints_2;
@@ -129,11 +129,11 @@ int main(int argc, char* argv[])
     for(cv::DMatch m : matches)
     {
         cv::Point2d pt1 = pixel2cam(keypoints_1[m.queryIdx].pt, K);
-        cv::Mat y1 = (cv::Mat_<double> (3,1) << pt1.x, pt1.y 1);
+        cv::Mat y1 = (cv::Mat_<double> (3,1) << pt1.x, pt1.y, 1);
         cv::Point2d pt2 = pixel2cam(keypoints_2[m.trainIdx].pt, K);
-        cv::Mat y2 = (cv::Mat_<double> (3,1) << pt2.x, pt2.y 1);
+        cv::Mat y2 = (cv::Mat_<double> (3,1) << pt2.x, pt2.y, 1);
         cv::Mat d = y2.t() * t_x * R * y1;
-        std::cout << "epipolar constraint = " << d 
+        std::cout << "epipolar constraint = " << d << std::endl;
     }
     return 0;
 
