@@ -11,3 +11,6 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(epipolar_constraint src/pose_estimation_2d2d.cpp)
 target_link_libraries(epipolar_constraint ${OpenCV_LIBS})
 
+add_executable(triangulation src/triangulation.cpp)
+target_link_libraries(triangulation ${OpenCV_LIBS})
+
