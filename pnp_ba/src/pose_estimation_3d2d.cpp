@@ -74,7 +74,7 @@ void bundleAdjustment(const std::vector<cv::Point3f> points_3d,
                       const cv::Mat& K, cv::Mat& R, cv::Mat& t)
 {
     //init g2o
-    //matrix block: variable: 6 dims, error: 3 dims
+    //matrix block: variable: 6 dims, landmark: 3 dims
     typedef g2o::BlockSolver<g2o::BlockSolverTraits<6,3>> Block;
     //linear solver: sparse update function
     Block::LinearSolverType* linearSolver = new g2o::LinearSolverCSparse<Block::PoseMatrixType>();
@@ -102,7 +102,7 @@ void bundleAdjustment(const std::vector<cv::Point3f> points_3d,
     optimizer.addVertex(pose);
 
     int index = 1;
-    for(const cv::Point3f p:points_3d)
+    for(const cv::Point3f p:points_3d) //landmark
     {
         g2o::VertexSBAPointXYZ* point = new g2o::VertexSBAPointXYZ();
         point->setId(index++);
