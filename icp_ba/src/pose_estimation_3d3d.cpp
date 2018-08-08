@@ -9,8 +9,9 @@
 #include <g2o/core/base_vertex.h>
 #include <g2o/core/base_unary_edge.h>
 #include <g2o/core/block_solver.h>
-#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/core/optimization_algorithm_gauss_newton.h>
 #include <g2o/solvers/csparse/linear_solver_csparse.h>
+#include <g2o/solvers/eigen/linear_solver_eigen.h>
 #include <g2o/types/sba/types_six_dof_expmap.h>
 #include <chrono>
 
@@ -29,7 +30,7 @@ public:
     
     virtual void linearizeOplus()
     {
-        g2o::VertexSE3Expmap* pose = static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
+        g2o::VertexSE3Expmap* pose = static_cast<g2o::VertexSE3Expmap*>(_vertices[0]);
         g2o::SE3Quat T(pose->estimate());
         Eigen::Vector3d xyz_trans = T.map(_point);
         double x = xyz_trans[0];
@@ -138,7 +139,7 @@ void pose_estimation_3d3d(const std::vector<cv::Point3f>& pts1,
     p2 = cv::Point3f(cv::Vec3f(p2) / N);
     //remove the center
     std::vector<cv::Point3f> q1(N);
-    std::Vector<cv::Point3f> q2(N);
+    std::vector<cv::Point3f> q2(N);
     for(int i = 0; i < N; i++)
     {
         q1[i] = pts1[i] - p1;
@@ -155,7 +156,7 @@ void pose_estimation_3d3d(const std::vector<cv::Point3f>& pts1,
     //SVD on W
     Eigen::JacobiSVD<Eigen::Matrix3d> svd (W, Eigen::ComputeFullU|Eigen::ComputeFullV);
     Eigen::Matrix3d U = svd.matrixU();
-    Eigen::Matrix3d V = scd.matrixV();
+    Eigen::Matrix3d V = svd.matrixV();
     std::cout << "U=" << U << std::endl;
     std::cout << "V=" << V << std::endl;
     Eigen::Matrix3d R_ = U * (V.transpose());
@@ -177,7 +178,7 @@ void bundleAdjustment(const std::vector<cv::Point3f>& pts1,
 {
     //init g2o
     typedef g2o::BlockSolver<g2o::BlockSolverTraits<6,3>> Block;
-    Block::LinearSolverType* linearSolver = new g2o::LinearSolverEigen<Block::PoseMatrixTYpe>();
+    Block::LinearSolverType* linearSolver = new g2o::LinearSolverEigen<Block::PoseMatrixType>();
     Block* solver_ptr = new Block(linearSolver);
     g2o::OptimizationAlgorithmGaussNewton * solver = new g2o::OptimizationAlgorithmGaussNewton(solver_ptr);
     g2o::SparseOptimizer optimizer;
