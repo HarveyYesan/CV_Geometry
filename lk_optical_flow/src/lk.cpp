@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         std::cout << "LK use time: " << time_used.count() << " seconds" << std::endl;
         //filter tracking lost points
         int i = 0;
-        for(auto iter = keypoints.begin(); iter != keypoints.end(); iter++)
+        for(auto iter = keypoints.begin(); iter != keypoints.end(); i++)
         {
             if(status[i] == 0)
             {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
                 continue;
             }
             *iter = next_points[i];
-            i++;
+            iter++;
         }
         std::cout << "tracked keypoints: " << keypoints.size() << std::endl;
         if(keypoints.size() == 0)
